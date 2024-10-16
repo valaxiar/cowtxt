@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Initialize variables
+character=""
+prompt=""
+
+# Parse the -c flag for the cowfile/character
+while getopts "c:" flag; do
+  case "$flag" in
+    c)
+      character="$OPTARG"
+      ;;
+    ?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Shift to access non-flag arguments (the prompt)
+shift $((OPTIND - 1))
+prompt="$*"
+
+# Get the list of available cowfiles
+cowfiles=$(cowsay -l | tail -n +2 | tr ' ' '\n')
+
+# Check if the -c flag was provided and if the cowfile is valid
+if [ -n "$character" ] && echo "$cowfiles" | grep -qw "$character"; then
+    aichat "you are a $character, here is the prompt: $prompt" | cowsay -f "$character"
+elif [ -z "$character" ]; then
+    aichat "you are a cow, here is the prompt: $prompt" | cowsay
+else
+    echo "Invalid cowfile: $character. Defaulting to cow."
+    aichat "you are a cow, here is the prompt: $prompt" | cowsay
+fi
